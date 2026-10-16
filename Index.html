@@ -165,6 +165,12 @@
       color: var(--text-muted);
     }
 
+    .card-badges {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
     .priority-badge {
       font-size: 10px;
       font-weight: 700;
@@ -177,6 +183,17 @@
     .badge-High { background: var(--priority-high); }
     .badge-Medium { background: var(--priority-med); }
     .badge-Low { background: var(--priority-low); }
+
+    .overdue-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #ef4444;
+      color: #dc2626;
+      background-color: #fef2f2;
+    }
 
     .task-title {
       font-size: 14px;
@@ -317,10 +334,15 @@
 
         const card = document.createElement('div');
         card.className = 'card';
+        const overdue = isOverdue(task.dueDate, task.status);
+
         card.innerHTML = `
           <div class="card-top">
             <span class="task-id">${task.id}</span>
-            <span class="priority-badge badge-${task.priority}">${task.priority}</span>
+            <div class="card-badges">
+              ${overdue ? '<span class="overdue-badge">Overdue</span>' : ''}
+              <span class="priority-badge badge-${task.priority}">${task.priority}</span>
+            </div>
           </div>
           <div class="task-title">${escapeHtml(task.name)}</div>
           <div class="task-desc">${escapeHtml(task.description)}</div>
@@ -398,6 +420,20 @@
       } else {
         el.style.display = 'none';
       }
+    }
+
+    function isOverdue(dueDate, status) {
+      if (!dueDate || status === 'Done') return false;
+      const cleanDueDate = String(dueDate).trim().substring(0, 10);
+      if (!cleanDueDate) return false;
+
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
+
+      return cleanDueDate < todayStr;
     }
 
     function escapeHtml(text) {

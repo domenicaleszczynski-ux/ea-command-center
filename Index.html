@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <title>EA Task Command Center</title>
+  <style>
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --primary-blue: #0284c7;
+      --primary-hover: #0369a1;
+      --priority-high: #ef4444;
+      --priority-med: #f59e0b;
+      --priority-low: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn {
+      background-color: var(--primary-blue);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-content h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+
+    .board-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .column {
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 480px;
+    }
+
+    .column-header {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .task-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .priority-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: white;
+    }
+
+    .badge-High { background: var(--priority-high); }
+    .badge-Medium { background: var(--priority-med); }
+    .badge-Low { background: var(--priority-low); }
+
+    .task-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .task-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 10px;
+    }
+
+    .owner-tag {
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .status-select {
+      font-size: 12px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background: white;
+      cursor: pointer;
+    }
+
+    #loading-indicator {
+      display: inline-block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>EA Task Command Center</h1>
+      <span id="loading-indicator">Loading tasks from Google Sheets...</span>
+    </div>
+    <button class="btn" onclick="openModal()">+ Add Task</button>
+  </header>
+
+  <div class="board-container">
+    <div class="column" id="col-To-Do">
+      <div class="column-header">To Do <span id="count-To-Do">(0)</span></div>
+      <div class="column-cards" id="cards-To-Do"></div>
+    </div>
+    <div class="column" id="col-In-Progress">
+      <div class="column-header">In Progress <span id="count-In-Progress">(0)</span></div>
+      <div class="column-cards" id="cards-In-Progress"></div>
+    </div>
+    <div class="column" id="col-Blocked">
+      <div class="column-header">Blocked <span id="count-Blocked">(0)</span></div>
+      <div class="column-cards" id="cards-Blocked"></div>
+    </div>
+    <div class="column" id="col-Done">
+      <div class="column-header">Done <span id="count-Done">(0)</span></div>
+      <div class="column-cards" id="cards-Done"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="taskModal">
+    <div class="modal-content">
+      <h2>Create New Task</h2>
+      <form id="newTaskForm" onsubmit="handleAddTask(event)">
+        <div class="form-group">
+          <label>Task Title</label>
+          <input type="text" id="taskName" required placeholder="e.g. Schedule Executive Briefing">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="taskDesc" rows="2" placeholder="Key context or details"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Owner</label>
+          <input type="text" id="taskOwner" required placeholder="e.g. Sofia Alvarez or EA">
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="taskPriority">
+            <option value="High">High</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" id="taskDueDate" required>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const stages = ['To Do', 'In Progress', 'Blocked', 'Done'];
+
+    document.addEventListener('DOMContentLoaded', fetchTasks);
+
+    function fetchTasks() {
+      setLoading(true, 'Syncing with Google Sheets...');
+      google.script.run
+        .withSuccessHandler(renderTasks)
+        .withFailureHandler(err => {
+          alert('Failed to load tasks: ' + err.message);
+          setLoading(false);
+        })
+        .getTasks();
+    }
+
+    function renderTasks(tasks) {
+      stages.forEach(stage => {
+        const id = stage.replace(/\s+/g, '-');
+        document.getElementById(`cards-${id}`).innerHTML = '';
+      });
+
+      const counts = { 'To Do': 0, 'In Progress': 0, 'Blocked': 0, 'Done': 0 };
+
+      tasks.forEach(task => {
+        const stageKey = stages.includes(task.status) ? task.status : 'To Do';
+        counts[stageKey]++;
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-top">
+            <span class="task-id">${task.id}</span>
+            <span class="priority-badge badge-${task.priority}">${task.priority}</span>
+          </div>
+          <div class="task-title">${escapeHtml(task.name)}</div>
+          <div class="task-desc">${escapeHtml(task.description)}</div>
+          <div class="card-footer">
+            <span class="owner-tag">👤 ${escapeHtml(task.owner)}</span>
+            <select class="status-select" onchange="onStatusChange('${task.id}', this.value)">
+              ${stages.map(s => `<option value="${s}" ${s === stageKey ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </div>
+        `;
+
+        const columnId = stageKey.replace(/\s+/g, '-');
+        document.getElementById(`cards-${columnId}`).appendChild(card);
+      });
+
+      stages.forEach(stage => {
+        const id = stage.replace(/\s+/g, '-');
+        document.getElementById(`count-${id}`).textContent = `(${counts[stage]})`;
+      });
+
+      setLoading(false);
+    }
+
+    function onStatusChange(taskId, newStatus) {
+      setLoading(true, `Saving ${taskId} as ${newStatus}...`);
+      google.script.run
+        .withSuccessHandler(() => {
+          fetchTasks();
+        })
+        .withFailureHandler(err => {
+          alert('Failed to update status: ' + err.message);
+          setLoading(false);
+        })
+        .updateTaskStatus(taskId, newStatus);
+    }
+
+    function handleAddTask(e) {
+      e.preventDefault();
+      const taskData = {
+        name: document.getElementById('taskName').value,
+        description: document.getElementById('taskDesc').value,
+        owner: document.getElementById('taskOwner').value,
+        priority: document.getElementById('taskPriority').value,
+        dueDate: document.getElementById('taskDueDate').value,
+        status: 'To Do'
+      };
+
+      setLoading(true, 'Creating task in Sheets...');
+      google.script.run
+        .withSuccessHandler(() => {
+          closeModal();
+          document.getElementById('newTaskForm').reset();
+          fetchTasks();
+        })
+        .withFailureHandler(err => {
+          alert('Error creating task: ' + err.message);
+          setLoading(false);
+        })
+        .addTask(taskData);
+    }
+
+    function openModal() {
+      document.getElementById('taskModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('taskModal').style.display = 'none';
+    }
+
+    function setLoading(isLoading, text) {
+      const el = document.getElementById('loading-indicator');
+      if (isLoading) {
+        el.textContent = text || 'Updating...';
+        el.style.display = 'inline-block';
+      } else {
+        el.style.display = 'none';
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.innerText = text || '';
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

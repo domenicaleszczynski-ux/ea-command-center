@@ -6,29 +6,31 @@
   <title>EA Task Command Center</title>
   <style>
     :root {
-      --bg-color: #f8fafc;
+      --bg-color: #f4f1ea;
       --card-bg: #ffffff;
-      --border-color: #e2e8f0;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --primary-blue: #0284c7;
-      --primary-hover: #0369a1;
-      --priority-high: #ef4444;
-      --priority-med: #f59e0b;
-      --priority-low: #10b981;
+      --border-color: #dcd6cd;
+      --text-main: #1f281e;
+      --text-muted: #626c60;
+      --primary-olive: #2c3e2b;
+      --primary-olive-hover: #1e2c1d;
+      --accent-olive: #4a5d48;
+      --column-bg: #e8e3d8;
+      --priority-high: #b91c1c;
+      --priority-med: #d97706;
+      --priority-low: #15803d;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
     body {
       background-color: var(--bg-color);
       color: var(--text-main);
-      padding: 24px;
+      padding: 28px;
     }
 
     header {
@@ -39,32 +41,72 @@
     }
 
     h1 {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 700;
-      color: var(--text-main);
+      color: var(--primary-olive);
+      letter-spacing: -0.3px;
     }
 
     .btn {
-      background-color: var(--primary-blue);
+      background-color: var(--primary-olive);
       color: white;
       border: none;
-      padding: 10px 16px;
+      padding: 10px 18px;
       border-radius: 6px;
       font-weight: 600;
       font-size: 14px;
       cursor: pointer;
-      transition: background 0.2s ease;
+      transition: background 0.2s ease, transform 0.1s ease;
     }
 
     .btn:hover {
-      background-color: var(--primary-hover);
+      background-color: var(--primary-olive-hover);
     }
 
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Metrics Dashboard */
+    .metrics-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary-olive);
+    }
+
+    /* Modal Overlay */
     .modal-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.5);
+      background: rgba(31, 40, 30, 0.6);
       justify-content: center;
       align-items: center;
       z-index: 1000;
@@ -77,10 +119,12 @@
       width: 100%;
       max-width: 480px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      border: 1px solid var(--border-color);
     }
 
     .modal-content h2 {
       font-size: 18px;
+      color: var(--primary-olive);
       margin-bottom: 16px;
     }
 
@@ -90,11 +134,12 @@
 
     .form-group label {
       display: block;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       color: var(--text-muted);
       margin-bottom: 4px;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .form-group input, .form-group textarea, .form-group select {
@@ -104,6 +149,13 @@
       border-radius: 6px;
       font-size: 14px;
       outline: none;
+      background: #faf8f5;
+      color: var(--text-main);
+    }
+
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      border-color: var(--primary-olive);
+      background: #ffffff;
     }
 
     .modal-actions {
@@ -114,10 +166,15 @@
     }
 
     .btn-secondary {
-      background: #e2e8f0;
+      background: #e2ddd3;
       color: var(--text-main);
     }
 
+    .btn-secondary:hover {
+      background: #d4ce22;
+    }
+
+    /* Kanban Board */
     .board-container {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -126,21 +183,25 @@
     }
 
     .column {
-      background: #f1f5f9;
+      background: var(--column-bg);
       border-radius: 8px;
       padding: 16px;
       min-height: 480px;
+      border: 1px solid var(--border-color);
     }
 
     .column-header {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
+      letter-spacing: 0.6px;
+      color: var(--primary-olive);
       margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      border-bottom: 2px solid rgba(44, 62, 43, 0.15);
     }
 
     .card {
@@ -149,14 +210,20 @@
       border-radius: 6px;
       padding: 14px;
       margin-bottom: 12px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: box-shadow 0.2s ease, transform 0.1s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+      transform: translateY(-1px);
     }
 
     .card-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .task-id {
@@ -198,6 +265,7 @@
     .task-title {
       font-size: 14px;
       font-weight: 600;
+      color: var(--text-main);
       margin-bottom: 6px;
     }
 
@@ -213,13 +281,13 @@
       justify-content: space-between;
       align-items: center;
       font-size: 12px;
-      border-top: 1px solid #f1f5f9;
+      border-top: 1px solid #f0ebe1;
       padding-top: 10px;
     }
 
     .owner-tag {
       font-weight: 600;
-      color: #334155;
+      color: var(--primary-olive);
     }
 
     .status-select {
@@ -227,7 +295,8 @@
       padding: 4px 6px;
       border-radius: 4px;
       border: 1px solid var(--border-color);
-      background: white;
+      background: #faf8f5;
+      color: var(--text-main);
       cursor: pointer;
     }
 
@@ -236,6 +305,7 @@
       font-size: 12px;
       color: var(--text-muted);
       margin-left: 12px;
+      font-weight: 500;
     }
   </style>
 </head>
@@ -248,6 +318,26 @@
     </div>
     <button class="btn" onclick="openModal()">+ Add Task</button>
   </header>
+
+  <!-- Metrics Dashboard -->
+  <div class="metrics-container">
+    <div class="metric-card">
+      <div class="metric-label">Total Tasks</div>
+      <div class="metric-value" id="metric-total">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Overdue Tasks</div>
+      <div class="metric-value" id="metric-overdue">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Blocked Items</div>
+      <div class="metric-value" id="metric-blocked">0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Completed Tasks</div>
+      <div class="metric-value" id="metric-completed">0</div>
+    </div>
+  </div>
 
   <div class="board-container">
     <div class="column" id="col-To-Do">
@@ -327,14 +417,22 @@
       });
 
       const counts = { 'To Do': 0, 'In Progress': 0, 'Blocked': 0, 'Done': 0 };
+      let totalTasks = tasks.length;
+      let overdueTasks = 0;
+      let blockedItems = 0;
+      let completedTasks = 0;
 
       tasks.forEach(task => {
         const stageKey = stages.includes(task.status) ? task.status : 'To Do';
         counts[stageKey]++;
 
+        const overdue = isOverdue(task.dueDate, task.status);
+        if (overdue) overdueTasks++;
+        if (task.status === 'Blocked') blockedItems++;
+        if (task.status === 'Done') completedTasks++;
+
         const card = document.createElement('div');
         card.className = 'card';
-        const overdue = isOverdue(task.dueDate, task.status);
 
         card.innerHTML = `
           <div class="card-top">
@@ -362,6 +460,12 @@
         const id = stage.replace(/\s+/g, '-');
         document.getElementById(`count-${id}`).textContent = `(${counts[stage]})`;
       });
+
+      // Update Metrics Dashboard
+      document.getElementById('metric-total').textContent = totalTasks;
+      document.getElementById('metric-overdue').textContent = overdueTasks;
+      document.getElementById('metric-blocked').textContent = blockedItems;
+      document.getElementById('metric-completed').textContent = completedTasks;
 
       setLoading(false);
     }
